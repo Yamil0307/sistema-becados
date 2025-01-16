@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Apartamento - Residencia Estudiantil</title>
+</head>
+<body>
+    <h2>Agregar Nuevo Apartamento</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Agregar Apartamento</button>
+    </form>
+    <a href="{% url 'home' %}">Volver al Inicio</a>
+</body>
+</html>
