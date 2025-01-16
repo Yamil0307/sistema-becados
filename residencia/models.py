@@ -52,36 +52,42 @@ class Apartamento(models.Model):
 
     def get_evaluacion_apto(self):
         # Obtener todos los becados del apartamento
-        total_becados = self.becados.count()
+        becados = self.becados.all()
+        total_becados = becados.count()
+        
         if total_becados == 0:
             return "Sin Evaluación"
 
-        # Contar becados por evaluación
-        evaluaciones = {
-            'Mal': self.becados.filter(
-                Q(get_evaluacion_cualitativa='Mal') |
-                Q(becadoextranjero__get_evaluacion_cualitativa='Mal')
-            ).count(),
-            'Regular': self.becados.filter(
-                Q(get_evaluacion_cualitativa='Regular') |
-                Q(becadoextranjero__get_evaluacion_cualitativa='Regular')
-            ).count(),
-            'Excelente': self.becados.filter(
-                Q(get_evaluacion_cualitativa='Excelente') |
-                Q(becadoextranjero__get_evaluacion_cualitativa='Excelente')
-            ).count(),
-        }
+        # Verificar si hay becados con nota 2 (Mal)
+        becados_mal = self.becados.filter(
+            Q(evaluacion_jefe_residencia=2) |
+            Q(evaluacion_jefe_apto=2) |
+            Q(evaluacion_profesor=2)
+        ).count()
 
-        # Si hay al menos un estudiante evaluado de Mal
-        if evaluaciones['Mal'] > 0:
+        if becados_mal > 0:
             return "Mal"
 
-        # Si el 100% está evaluado de Excelente
-        if evaluaciones['Excelente'] == total_becados:
+        # Verificar becados excelentes (todas las notas >= 4)
+        becados_excelentes = self.becados.filter(
+            evaluacion_jefe_residencia__gte=4,
+            evaluacion_jefe_apto__gte=4,
+            evaluacion_profesor__gte=4
+        ).count()
+
+        if becados_excelentes == total_becados:
             return "Excelente"
 
+        # Contar becados regulares (promedio entre 3 y 4)
+        from django.db.models import Avg, F
+        becados_regulares = self.becados.annotate(
+            promedio=(F('evaluacion_jefe_residencia') + 
+                     F('evaluacion_jefe_apto') + 
+                     F('evaluacion_profesor')) / 3.0
+        ).filter(promedio__gte=3, promedio__lt=4).count()
+
         # Calcular porcentaje de Regular
-        porcentaje_regular = (evaluaciones['Regular'] / total_becados) * 100
+        porcentaje_regular = (becados_regulares / total_becados) * 100
 
         # Si 30% o más están evaluados de Regular
         if porcentaje_regular >= 30:
