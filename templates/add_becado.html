@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Becado - Residencia Estudiantil</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/modal.css' %}">
+</head>
+<body>
+    <h2>Agregar Becado</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <button id="addBecadoBtn">Agregar Nuevo Becado</button>
+
+    <!-- Modal -->
+    <div id="addBecadoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Agregar Nuevo Becado</h2>
+            <form method="POST" id="becadoForm">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="field-errors">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit">Agregar Becado</button>
+            </form>
+        </div>
+    </div>
+    
+    <h2>Listado de Becados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Número de Identidad</th>
+                <th>Dirección</th>
+                <th>Carrera</th>
+                <th>Año</th>
+                <th>País</th>
+                <th>Apartamento</th>
+                <th>Evaluación JR</th>
+                <th>Evaluación JA</th>
+                <th>Evaluación Prof</th>
+                <th>Evaluación Final</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for becado in becados %}
+            <tr>
+                <td>{{ becado.nombre }}</td>
+                <td>{{ becado.numero_identidad }}</td>
+                <td>{{ becado.direccion_particular }}</td>
+                <td>{{ becado.carrera }}</td>
+                <td>{{ becado.año }}</td>
+                <td>{{ becado.pais }}</td>
+                <td>{{ becado.apartamento.numero }}</td>
+                <td>{{ becado.evaluacion_jefe_residencia }}</td>
+                <td>{{ becado.evaluacion_jefe_apto }}</td>
+                <td>{{ becado.evaluacion_profesor }}</td>
+                <td>{{ becado.get_evaluacion_cualitativa }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'home' %}">Volver al Inicio</a>
+
+    <script src="{% static 'js/add_becado.js' %}"></script>
+</body>
+</html>

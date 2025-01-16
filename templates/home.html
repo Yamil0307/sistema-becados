@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home - Residencia Estudiantil</title>
+</head>
+<body>
+    <h1>Bienvenido a la Residencia Estudiantil</h1>
+    {% if user.is_authenticated %}
+        <p>Hola, {{ user.username }}!</p>
+        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+    {% else %}
+        <p>Por favor, inicie sesión para acceder al sistema</p>
+        <a href="{% url 'login' %}">Iniciar Sesión</a>
+    {% endif %}
+    
+    <div class="main-menu">
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="{% url 'listar_apartamentos' %}">Listar Apartamentos</a></li> <!-- Verifica que esta línea esté presente -->
+            <li><a href="{% url 'add_becado' %}">Lisar Becados</a></li> <!-- Nueva línea para agregar becado -->
+            <li><a href="{% url 'list_residencias' %}">Listar Residencias</a></li> <!-- Nueva línea para listar residencias -->
+        </ul>
+    </div>
+</body>
+</html>

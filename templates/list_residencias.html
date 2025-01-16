@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Residencias - Residencia Estudiantil</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/modal.css' %}">
+</head>
+<body>
+    <h2>Lista de Residencias</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Cantidad de Apartamentos</th>
+                <th>Jefe del Consejo</th>
+                <th>Profesor que Atiende</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for residencia in residencias %}
+            <tr>
+                <td>{{ residencia.nombre }}</td>
+                <td>{{ residencia.cantidad_apartamentos }}</td>
+                <td>{{ residencia.jefe_consejo }}</td>
+                <td>{{ residencia.profesor_atiende }}</td>
+                <td>
+                    <button class="editResidenciaBtn" data-id="{{ residencia.id }}">Editar</button>
+                    <button class="deleteResidenciaBtn" data-id="{{ residencia.id }}">Eliminar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <button id="addResidenciaBtn">Agregar Nueva Residencia</button>
+
+    <!-- Modal -->
+    <div id="addResidenciaModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Agregar Nueva Residencia</h2>
+            <form method="POST" id="residenciaForm">
+                {% csrf_token %}
+                <input type="hidden" id="residenciaId" name="residencia_id">
+                {{ form.as_p }}
+                <button type="submit" id="submitBtn">Agregar Residencia</button>
+            </form>
+        </div>
+    </div>
+    
+    <a href="{% url 'home' %}">Volver al Inicio</a>
+
+    <script src="{% static 'js/list_residencias.js' %}"></script>
+</body>
+</html>
