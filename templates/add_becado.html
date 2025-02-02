@@ -17,6 +17,49 @@
     {% endif %}
     
     <button id="addBecadoBtn">Agregar Nuevo Becado</button>
+    <form method="GET" action="{% url 'export_becados' %}">
+        {% csrf_token %}
+        <input type="hidden" name="filter_option" value="{{ filter_option }}">
+        <input type="hidden" name="filter_country" value="{{ filter_country }}">
+        <input type="text" name="filename" placeholder="Nombre del archivo (sin .txt)" required>
+        <button type="submit">Exportar Listado de Becados</button>
+    </form>
+
+    <!-- Filter Form -->
+    <form method="GET" action="{% url 'add_becado' %}">
+        <label for="filter_option">Filtrar por:</label>
+        <select name="filter_option" id="filter_option" onchange="toggleCountryInput()">
+            <option value="all" {% if filter_option == 'all' %}selected{% endif %}>Todos los Becados</option>
+            <option value="foreign" {% if filter_option == 'foreign' %}selected{% endif %}>Becados Extranjeros</option>
+            <option value="country" {% if filter_option == 'country' %}selected{% endif %}>Por País</option>
+        </select>
+        <input type="text" name="filter_country" id="filter_country" placeholder="Escriba el país" value="{{ filter_country }}" {% if filter_option != 'country' %}style="display:none;"{% endif %}>
+        <label for="evaluation_filter">Filtrar por Evaluación:</label>
+        <select name="evaluation_filter" id="evaluation_filter">
+            <option value="all" {% if evaluation_filter == 'all' %}selected{% endif %}>Todos</option>
+            <option value="Excelente" {% if evaluation_filter == 'Excelente' %}selected{% endif %}>Excelente</option>
+            <option value="Bien" {% if evaluation_filter == 'Bien' %}selected{% endif %}>Bien</option>
+            <option value="Regular" {% if evaluation_filter == 'Regular' %}selected{% endif %}>Regular</option>
+            <option value="Mal" {% if evaluation_filter == 'Mal' %}selected{% endif %}>Mal</option>
+        </select>
+        <label for="birthday_month">Mes de Cumpleaños:</label>
+        <select name="birthday_month" id="birthday_month">
+            <option value="" {% if birthday_month == '' %}selected{% endif %}>Todos</option>
+            <option value="01" {% if birthday_month == '01' %}selected{% endif %}>Enero</option>
+            <option value="02" {% if birthday_month == '02' %}selected{% endif %}>Febrero</option>
+            <option value="03" {% if birthday_month == '03' %}selected{% endif %}>Marzo</option>
+            <option value="04" {% if birthday_month == '04' %}selected{% endif %}>Abril</option>
+            <option value="05" {% if birthday_month == '05' %}selected{% endif %}>Mayo</option>
+            <option value="06" {% if birthday_month == '06' %}selected{% endif %}>Junio</option>
+            <option value="07" {% if birthday_month == '07' %}selected{% endif %}>Julio</option>
+            <option value="08" {% if birthday_month == '08' %}selected{% endif %}>Agosto</option>
+            <option value="09" {% if birthday_month == '09' %}selected{% endif %}>Septiembre</option>
+            <option value="10" {% if birthday_month == '10' %}selected{% endif %}>Octubre</option>
+            <option value="11" {% if birthday_month == '11' %}selected{% endif %}>Noviembre</option>
+            <option value="12" {% if birthday_month == '12' %}selected{% endif %}>Diciembre</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
 
     <!-- Modal -->
     <div id="addBecadoModal" class="modal">
@@ -59,6 +102,7 @@
                 <th>Evaluación JA</th>
                 <th>Evaluación Prof</th>
                 <th>Evaluación Final</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -75,13 +119,88 @@
                 <td>{{ becado.evaluacion_jefe_apto }}</td>
                 <td>{{ becado.evaluacion_profesor }}</td>
                 <td>{{ becado.get_evaluacion_cualitativa }}</td>
+                <td>
+                    <button type="button"
+                            class="edit-becado-btn"
+                            data-becado-id="{{ becado.id }}">
+                        Editar
+                    </button>
+                    <form method="POST" action="{% url 'delete_becado' becado.id %}">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este becado?');">Eliminar</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     
+    <!-- Nuevo Modal para editar becado -->
+    <div id="editBecadoModal" class="modal">
+        <div class="modal-content" style="position:relative;">
+            <span class="close-edit" style="position:absolute; top:10px; right:10px; cursor:pointer;">&times;</span>
+            <h2>Editar Becado</h2>
+            <form method="POST" id="editBecadoForm">
+                {% csrf_token %}
+                <input type="hidden" name="becado_id" id="editBecadoId">
+                <div class="form-group">
+                    <label for="editNombre">Nombre</label>
+                    <input type="text" name="nombre" id="editNombre" />
+                </div>
+                <div class="form-group">
+                    <label for="editNumeroIdentidad">Número de Identidad</label>
+                    <input type="text" name="numero_identidad" id="editNumeroIdentidad" />
+                </div>
+                <div class="form-group">
+                    <label for="editDireccion">Dirección Particular</label>
+                    <input type="text" name="direccion_particular" id="editDireccion" />
+                </div>
+                <div class="form-group">
+                    <label for="editCarrera">Carrera</label>
+                    <input type="text" name="carrera" id="editCarrera" />
+                </div>
+                <div class="form-group">
+                    <label for="editAno">Año</label>
+                    <input type="number" name="año" id="editAno" />
+                </div>
+                <div class="form-group">
+                    <label for="editPais">País</label>
+                    <input type="text" name="pais" id="editPais" />
+                </div>
+                <div class="form-group">
+                    <label for="editApartamento">Apartamento</label>
+                    <input type="number" name="apartamento" id="editApartamento" />
+                </div>
+                <div class="form-group">
+                    <label for="editEvaJefeResidencia">Evaluación del Jefe de Residencia</label>
+                    <input type="number" name="evaluacion_jefe_residencia" id="editEvaJefeResidencia" min="2" max="5" />
+                </div>
+                <div class="form-group">
+                    <label for="editEvaJefeApto">Evaluación del Jefe de Apartamento</label>
+                    <input type="number" name="evaluacion_jefe_apto" id="editEvaJefeApto" min="2" max="5" />
+                </div>
+                <div class="form-group">
+                    <label for="editEvaProfesor">Evaluación del Profesor</label>
+                    <input type="number" name="evaluacion_profesor" id="editEvaProfesor" min="2" max="5" />
+                </div>
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
     <a href="{% url 'home' %}">Volver al Inicio</a>
 
     <script src="{% static 'js/add_becado.js' %}"></script>
+    <script>
+        function toggleCountryInput() {
+            const filterOption = document.getElementById('filter_option').value;
+            const filterCountryInput = document.getElementById('filter_country');
+            if (filterOption === 'country') {
+                filterCountryInput.style.display = 'inline';
+            } else {
+                filterCountryInput.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,25 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home - Residencia Estudiantil</title>
+    <title>ResEst Manager - Home</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 </head>
 <body>
-    <h1>Bienvenido a la Residencia Estudiantil</h1>
-    {% if user.is_authenticated %}
-        <p>Hola, {{ user.username }}!</p>
-        <a href="{% url 'logout' %}">Cerrar Sesión</a>
-    {% else %}
-        <p>Por favor, inicie sesión para acceder al sistema</p>
-        <a href="{% url 'login' %}">Iniciar Sesión</a>
-    {% endif %}
-    
-    <div class="main-menu">
-        <h2>Menú Principal</h2>
-        <ul>
-            <li><a href="{% url 'listar_apartamentos' %}">Listar Apartamentos</a></li> <!-- Verifica que esta línea esté presente -->
-            <li><a href="{% url 'add_becado' %}">Lisar Becados</a></li> <!-- Nueva línea para agregar becado -->
-            <li><a href="{% url 'list_residencias' %}">Listar Residencias</a></li> <!-- Nueva línea para listar residencias -->
-        </ul>
+    <div class="navbar">
+        <h1>ResEst Manager</h1>
+        <div class="menu">
+            <ul>
+                <li><a href="{% url 'listar_apartamentos' %}">Listar Apartamentos</a></li>
+                <li><a href="{% url 'add_becado' %}">Listar Becados</a></li>
+                <li><a href="{% url 'list_residencias' %}">Listar Residencias</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="left-section">
+            <img src="{% static 'images/Leonardo_Phoenix 1 logo.jpg' %}" alt="Imagen">
+        </div>
+        <div class="right-section">
+            <h2>Bienvenido a ResEst Manager</h2>
+            <div class="description">
+                <p>Gestiona tu residencia estudiantil de manera eficiente y sencilla.</p>
+                <p>Explora las funcionalidades y descubre cómo podemos ayudarte a mantener todo en orden.</p>
+            </div>
+            <ol class="features-list">
+                <li>
+                    <img src="{% static 'images/feature1.jpg' %}" alt="">
+                    <p>Organiza tus apartamentos y becados con facilidad.</p>
+                </li>
+                <li>
+                    <img src="{% static 'images/feature2.jpg' %}" alt="">
+                    <p>Accede a información detallada y actualizada en todo momento.</p>
+                </li>
+                <li>
+                    <img src="{% static 'images/feature3.jpg' %}" alt="">
+                    <p>Disfruta de una interfaz intuitiva y amigable.</p>
+                </li>
+            </ol>
+        </div>
     </div>
 </body>
 </html>

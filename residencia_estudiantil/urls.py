@@ -30,4 +30,7 @@ urlpatterns = [
     path('list_residencias/', views.list_residencias_view, name='list_residencias'),
     path('get_residencia/<int:id>/', views.get_residencia, name='get_residencia'),
     path('delete_residencia/<int:id>/', views.delete_residencia, name='delete_residencia'),
+    path('get_becado/<int:id>/', views.get_becado, name='get_becado'),
+    path('delete_becado/<int:id>/', views.delete_becado, name='delete_becado'),
+    path('export_becados/', views.export_becados_view, name='export_becados'),
 ]

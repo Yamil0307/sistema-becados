@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
@@ -31,6 +33,9 @@ def logout_view(request):
 
 @login_required
 def listar_apartamentos_view(request):
+    evaluation_filter = request.GET.get('evaluation_filter', 'all')
+    mal_filter = request.GET.get('mal_filter', 'off')
+
     if request.method == 'POST':
         apartamento_id = request.POST.get('apartamento_id')
         if apartamento_id:
@@ -39,17 +44,32 @@ def listar_apartamentos_view(request):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Apartamento editado exitosamente')
+            else:
+                messages.error(request, 'Error al editar el apartamento')
         else:
             form = ApartamentoForm(request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Apartamento agregado exitosamente')
+            else:
+                messages.error(request, 'Error al agregar el apartamento')
         return redirect('listar_apartamentos')
     else:
         form = ApartamentoForm()
-    
+
     apartamentos = Apartamento.objects.all()
-    return render(request, 'listar_apartamentos.html', {'form': form, 'apartamentos': apartamentos})
+    for apto in apartamentos:
+        apto.actualizar_cantidad_becados()
+
+    if evaluation_filter != 'all':
+        apartamentos = [apto for apto in apartamentos if apto.get_evaluacion_apto() == evaluation_filter]
+
+    if mal_filter == 'on':
+        apartamentos = [apto for apto in apartamentos if sum(1 for becado in apto.becados.all() if becado.get_evaluacion_cualitativa() == 'Mal') > 2]
+
+    count = len(apartamentos)
+
+    return render(request, 'listar_apartamentos.html', {'form': form, 'apartamentos': apartamentos, 'evaluation_filter': evaluation_filter, 'mal_filter': mal_filter, 'count': count})
 
 @login_required
 def get_apartamento(request, id):
@@ -58,6 +78,7 @@ def get_apartamento(request, id):
         'residencia': apartamento.residencia.id,
         'numero': apartamento.numero,
         'cantidad_becados': apartamento.cantidad_becados,
+        'capacidad': apartamento.capacidad,  # Nuevo campo
         'jefe_apto': apartamento.jefe_apto,
         'profesor_atiende': apartamento.profesor_atiende,
     }
@@ -73,29 +94,55 @@ def delete_apartamento(request, id):
 
 @login_required
 def add_becado_view(request):
+    filter_option = request.GET.get('filter_option', 'all')
+    filter_country = request.GET.get('filter_country', '')
+    evaluation_filter = request.GET.get('evaluation_filter', 'all')
+    birthday_month = request.GET.get('birthday_month', '')
+
+    if filter_option == 'foreign':
+        becados = Becado.objects.exclude(pais='Cuba').order_by('nombre')
+    elif filter_option == 'country' and filter_country:
+        becados = Becado.objects.filter(pais__icontains=filter_country).order_by('nombre')
+    else:
+        becados = Becado.objects.all().order_by('nombre')
+
+    if evaluation_filter != 'all':
+        becados = [becado for becado in becados if becado.get_evaluacion_cualitativa() == evaluation_filter]
+
+    if birthday_month:
+        becados = [becado for becado in becados if becado.numero_identidad[2:4] == birthday_month]
+
     if request.method == 'POST':
-        form = BecadoForm(request.POST)
-        if form.is_valid():
-            try:
-                becado = form.save(commit=False)
-                apartamento = becado.apartamento
-                if apartamento.cantidad_becados < 4:  # Suponiendo que la capacidad máxima es 4
-                    apartamento.cantidad_becados += 1
-                    apartamento.save()
-                    becado.save()
-                    messages.success(request, 'Becado agregado exitosamente')
-                    return redirect('add_becado')
-                else:
-                    messages.error(request, 'El apartamento no tiene capacidad disponible')
-            except Exception as e:
-                messages.error(request, f'Error al guardar el becado: {str(e)}')
+        becado_id = request.POST.get('becado_id')
+        if becado_id:
+            becado = get_object_or_404(Becado, id=becado_id)
+            form = BecadoForm(request.POST, instance=becado)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Becado editado exitosamente')
+                return redirect('add_becado')
         else:
-            messages.error(request, 'Por favor, corrija los errores en el formulario')
+            form = BecadoForm(request.POST)
+            if form.is_valid():
+                try:
+                    becado = form.save(commit=False)
+                    apartamento = becado.apartamento
+                    if apartamento.cantidad_becados < apartamento.capacidad:  # Comprobar capacidad disponible
+                        apartamento.cantidad_becados += 1
+                        apartamento.save()
+                        becado.save()
+                        messages.success(request, 'Becado agregado exitosamente')
+                        return redirect('add_becado')
+                    else:
+                        messages.error(request, 'El apartamento no tiene capacidad disponible')
+                except Exception as e:
+                    messages.error(request, f'Error al guardar el becado: {str(e)}')
+            else:
+                messages.error(request, 'Por favor, corrija los errores en el formulario')
     else:
         form = BecadoForm()
     
-    becados = Becado.objects.all().order_by('nombre')
-    return render(request, 'add_becado.html', {'form': form, 'becados': becados})
+    return render(request, 'add_becado.html', {'form': form, 'becados': becados, 'filter_option': filter_option, 'filter_country': filter_country, 'evaluation_filter': evaluation_filter, 'birthday_month': birthday_month})
 
 @login_required
 def list_residencias_view(request):
@@ -115,9 +162,39 @@ def list_residencias_view(request):
         return redirect('list_residencias')
     else:
         form = ResidenciaForm()
-    
+
     residencias = Residencia.objects.all()
-    return render(request, 'list_residencias.html', {'residencias': residencias, 'form': form})
+    residencia_data = []
+
+    for residencia in residencias:
+        cubanos = Becado.objects.filter(apartamento__residencia=residencia, pais='Cuba').count()
+        extranjeros = Becado.objects.filter(apartamento__residencia=residencia).exclude(pais='Cuba').count()
+        evaluacion = calcular_evaluacion_residencia(residencia)
+        residencia_data.append({
+            'residencia': residencia,
+            'cubanos': cubanos,
+            'extranjeros': extranjeros,
+            'evaluacion': evaluacion
+        })
+
+    return render(request, 'list_residencias.html', {'residencias': residencia_data, 'form': form})
+
+def calcular_evaluacion_residencia(residencia):
+    becados = Becado.objects.filter(apartamento__residencia=residencia)
+    if not becados:
+        return "Sin Evaluación"
+    evaluaciones = [becado.get_evaluacion_cualitativa() for becado in becados]
+    # Implementar lógica para calcular la evaluación de la residencia
+    # Por ejemplo, podrías calcular la evaluación promedio o usar otra lógica
+    # Aquí se muestra un ejemplo simple de cómo podrías hacerlo
+    if evaluaciones.count("Excelente") > evaluaciones.count("Mal"):
+        return "Excelente"
+    elif evaluaciones.count("Bien") > evaluaciones.count("Regular"):
+        return "Bien"
+    elif evaluaciones.count("Regular") > evaluaciones.count("Mal"):
+        return "Regular"
+    else:
+        return "Mal"
 
 @login_required
 def get_residencia(request, id):
@@ -137,3 +214,80 @@ def delete_residencia(request, id):
         residencia.delete()
         return HttpResponse(status=204)
     return HttpResponse(status=405)
+
+@login_required
+def get_becado(request, id):
+    becado = get_object_or_404(Becado, id=id)
+    data = {
+        'nombre': becado.nombre,
+        'numero_identidad': becado.numero_identidad,
+        'direccion_particular': becado.direccion_particular,
+        'carrera': becado.carrera,
+        'año': becado.año,
+        'apartamento': becado.apartamento.id,
+        'pais': becado.pais,
+        'evaluacion_jefe_residencia': becado.evaluacion_jefe_residencia,
+        'evaluacion_jefe_apto': becado.evaluacion_jefe_apto,
+        'evaluacion_profesor': becado.evaluacion_profesor,
+    }
+    return JsonResponse(data)
+
+def listar_becados_view(request):
+    if request.method == 'POST':
+        becado_id = request.POST.get('becado_id')
+        if becado_id:
+            becado = get_object_or_404(Becado, id=becado_id)
+            form = BecadoForm(request.POST, instance=becado)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Becado editado exitosamente')
+            else:
+                messages.error(request, 'Error al editar el becado')
+        else:
+            form = BecadoForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Becado agregado exitosamente')
+            else:
+                messages.error(request, 'Error al agregar el becado')
+        return redirect('listar_becados')
+    else:
+        form = BecadoForm()
+    
+    becados = Becado.objects.all()
+    return render(request, 'listar_becados.html', {'form': form, 'becados': becados})
+
+@login_required
+def delete_becado(request, id):
+    becado = get_object_or_404(Becado, id=id)
+    apartamento = becado.apartamento
+    if request.method == 'POST':
+        becado.delete()
+        apartamento.cantidad_becados -= 1
+        apartamento.save()
+        messages.success(request, 'Becado eliminado exitosamente')
+        return redirect('add_becado')
+    return HttpResponse(status=405)
+
+@login_required
+def export_becados_view(request):
+    filter_option = request.GET.get('filter_option', 'all')
+    filter_country = request.GET.get('filter_country', '')
+    filename = request.GET.get('filename', 'becados_evaluacion.txt')
+
+    if not filename.endswith('.txt'):
+        filename += '.txt'
+
+    if filter_option == 'foreign':
+        becados = Becado.objects.exclude(pais='Cuba').order_by('nombre')
+    elif filter_option == 'country' and filter_country:
+        becados = Becado.objects.filter(pais__icontains=filter_country).order_by('nombre')
+    else:
+        becados = Becado.objects.all().order_by('nombre')
+
+    file_path = os.path.join(settings.BASE_DIR, filename)
+    with open(file_path, 'w') as file:
+        for becado in becados:
+            file.write(f'{becado.nombre}: {becado.get_evaluacion_cualitativa()}\n')
+    messages.success(request, f'Listado de becados exportado exitosamente como {filename}')
+    return redirect('add_becado')

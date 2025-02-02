@@ -14,19 +14,25 @@
                 <th>Cantidad de Apartamentos</th>
                 <th>Jefe del Consejo</th>
                 <th>Profesor que Atiende</th>
+                <th>Estudiantes Cubanos</th>
+                <th>Estudiantes Extranjeros</th>
+                <th>Evaluación</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for residencia in residencias %}
+            {% for data in residencias %}
             <tr>
-                <td>{{ residencia.nombre }}</td>
-                <td>{{ residencia.cantidad_apartamentos }}</td>
-                <td>{{ residencia.jefe_consejo }}</td>
-                <td>{{ residencia.profesor_atiende }}</td>
+                <td>{{ data.residencia.nombre }}</td>
+                <td>{{ data.residencia.cantidad_apartamentos }}</td>
+                <td>{{ data.residencia.jefe_consejo }}</td>
+                <td>{{ data.residencia.profesor_atiende }}</td>
+                <td>{{ data.cubanos }}</td>
+                <td>{{ data.extranjeros }}</td>
+                <td>{{ data.evaluacion }}</td>
                 <td>
-                    <button class="editResidenciaBtn" data-id="{{ residencia.id }}">Editar</button>
-                    <button class="deleteResidenciaBtn" data-id="{{ residencia.id }}">Eliminar</button>
+                    <button class="editResidenciaBtn" data-id="{{ data.residencia.id }}">Editar</button>
+                    <button class="deleteResidenciaBtn" data-id="{{ data.residencia.id }}">Eliminar</button>
                 </td>
             </tr>
             {% endfor %}

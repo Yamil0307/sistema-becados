@@ -11,7 +11,7 @@ class Residencia(models.Model):
     def get_evaluacion_residencia(self):
         # Obtener todos los apartamentos de la residencia
         total_aptos = self.apartamentos.count()
-        if total_aptos == 0:
+        if (total_aptos == 0):
             return "Sin Evaluación"
 
         # Contar apartamentos por evaluación
@@ -26,15 +26,15 @@ class Residencia(models.Model):
         porcentaje_regular = (evaluaciones['Regular'] / total_aptos) * 100
 
         # Si 5% o más están evaluados de Mal
-        if porcentaje_mal >= 5:
+        if (porcentaje_mal >= 5):
             return "Mal"
 
         # Si el 100% está evaluado de Excelente
-        if evaluaciones['Excelente'] == total_aptos:
+        if (evaluaciones['Excelente'] == total_aptos):
             return "Excelente"
 
         # Si 30% o más están evaluados de Regular
-        if porcentaje_regular >= 30:
+        if (porcentaje_regular >= 30):
             return "Regular"
         # Si menos del 30% está evaluado de Regular
         else:
@@ -45,8 +45,9 @@ class Residencia(models.Model):
 
 class Apartamento(models.Model):
     residencia = models.ForeignKey(Residencia, on_delete=models.CASCADE)
-    numero = models.CharField(max_length=10)
-    cantidad_becados = models.IntegerField()
+    numero = models.CharField(max_length=10, unique=True)  # Campo único
+    cantidad_becados = models.IntegerField(default=0)
+    capacidad = models.IntegerField()  # Nuevo campo
     jefe_apto = models.CharField(max_length=100)
     profesor_atiende = models.CharField(max_length=100)
 
@@ -55,7 +56,7 @@ class Apartamento(models.Model):
         becados = self.becados.all()
         total_becados = becados.count()
         
-        if total_becados == 0:
+        if (total_becados == 0):
             return "Sin Evaluación"
 
         # Verificar si hay becados con nota 2 (Mal)
@@ -65,7 +66,7 @@ class Apartamento(models.Model):
             Q(evaluacion_profesor=2)
         ).count()
 
-        if becados_mal > 0:
+        if (becados_mal > 0):
             return "Mal"
 
         # Verificar becados excelentes (todas las notas >= 4)
@@ -75,7 +76,7 @@ class Apartamento(models.Model):
             evaluacion_profesor__gte=4
         ).count()
 
-        if becados_excelentes == total_becados:
+        if (becados_excelentes == total_becados):
             return "Excelente"
 
         # Contar becados regulares (promedio entre 3 y 4)
@@ -90,11 +91,15 @@ class Apartamento(models.Model):
         porcentaje_regular = (becados_regulares / total_becados) * 100
 
         # Si 30% o más están evaluados de Regular
-        if porcentaje_regular >= 30:
+        if (porcentaje_regular >= 30):
             return "Regular"
         # Si menos del 30% está evaluado de Regular
         else:
             return "Bien"
+
+    def actualizar_cantidad_becados(self):
+        self.cantidad_becados = self.becados.count()
+        self.save()
 
     def __str__(self):
         return f"Apartamento {self.numero} - {self.residencia.nombre}"
@@ -145,11 +150,11 @@ class Becado(models.Model):
         # Calcular promedio
         promedio = self.promedio_evaluacion()
         
-        if promedio > 4.75:
+        if (promedio > 4.75):
             return "Excelente"
-        elif 4 <= promedio <= 4.75:
+        elif (4 <= promedio <= 4.75):
             return "Bien"
-        elif 3 <= promedio < 4:
+        elif (3 <= promedio < 4):
             return "Regular"
         else:
             return "Mal"
@@ -183,11 +188,11 @@ class BecadoExtranjero(Becado):
         # Calcular promedio
         promedio = self.promedio_evaluacion()
         
-        if promedio > 4.75:
+        if (promedio > 4.75):
             return "Excelente"
-        elif 4 <= promedio <= 4.75:
+        elif (4 <= promedio <= 4.75):
             return "Bien"
-        elif 3 <= promedio < 4:
+        elif (3 <= promedio < 4):
             return "Regular"
         else:
             return "Mal"
