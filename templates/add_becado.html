@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agregar Becado - Residencia Estudiantil</title>
+    <title >Listado Becados - Residencia Estudiantil</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/list_becados.css' %}">
 </head>
 <body>
-    <h2>Agregar Becado</h2>
+    <h2 class="titulo">Listado de Becados</h2>
     
     {% if messages %}
     <div class="messages">
@@ -15,26 +16,17 @@
         {% endfor %}
     </div>
     {% endif %}
-    
-    <button id="addBecadoBtn">Agregar Nuevo Becado</button>
-    <form method="GET" action="{% url 'export_becados' %}">
-        {% csrf_token %}
-        <input type="hidden" name="filter_option" value="{{ filter_option }}">
-        <input type="hidden" name="filter_country" value="{{ filter_country }}">
-        <input type="text" name="filename" placeholder="Nombre del archivo (sin .txt)" required>
-        <button type="submit">Exportar Listado de Becados</button>
-    </form>
 
     <!-- Filter Form -->
     <form method="GET" action="{% url 'add_becado' %}">
-        <label for="filter_option">Filtrar por:</label>
+        <label class="filtros" for="filter_option">Filtrar por:</label>
         <select name="filter_option" id="filter_option" onchange="toggleCountryInput()">
             <option value="all" {% if filter_option == 'all' %}selected{% endif %}>Todos los Becados</option>
             <option value="foreign" {% if filter_option == 'foreign' %}selected{% endif %}>Becados Extranjeros</option>
             <option value="country" {% if filter_option == 'country' %}selected{% endif %}>Por País</option>
         </select>
         <input type="text" name="filter_country" id="filter_country" placeholder="Escriba el país" value="{{ filter_country }}" {% if filter_option != 'country' %}style="display:none;"{% endif %}>
-        <label for="evaluation_filter">Filtrar por Evaluación:</label>
+        <label class="filtros" for="evaluation_filter">Filtrar por Evaluación:</label>
         <select name="evaluation_filter" id="evaluation_filter">
             <option value="all" {% if evaluation_filter == 'all' %}selected{% endif %}>Todos</option>
             <option value="Excelente" {% if evaluation_filter == 'Excelente' %}selected{% endif %}>Excelente</option>
@@ -42,7 +34,7 @@
             <option value="Regular" {% if evaluation_filter == 'Regular' %}selected{% endif %}>Regular</option>
             <option value="Mal" {% if evaluation_filter == 'Mal' %}selected{% endif %}>Mal</option>
         </select>
-        <label for="birthday_month">Mes de Cumpleaños:</label>
+        <label class="filtros" for="birthday_month">Mes de Cumpleaños:</label>
         <select name="birthday_month" id="birthday_month">
             <option value="" {% if birthday_month == '' %}selected{% endif %}>Todos</option>
             <option value="01" {% if birthday_month == '01' %}selected{% endif %}>Enero</option>
@@ -87,39 +79,38 @@
         </div>
     </div>
     
-    <h2>Listado de Becados</h2>
-    <table>
+    <table class="tabla_becados">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Número de Identidad</th>
-                <th>Dirección</th>
-                <th>Carrera</th>
-                <th>Año</th>
-                <th>País</th>
-                <th>Apartamento</th>
-                <th>Evaluación JR</th>
-                <th>Evaluación JA</th>
-                <th>Evaluación Prof</th>
-                <th>Evaluación Final</th>
-                <th>Acciones</th>
+                <th class="columnas">Nombre</th>
+                <th class="columnas">Número de Identidad</th>
+                <th class="columnas">Dirección</th>
+                <th class="columnas">Carrera</th>
+                <th class="columnas">Año</th>
+                <th class="columnas">País</th>
+                <th class="columnas">Apartamento</th>
+                <th class="columnas">Evaluación JR</th>
+                <th class="columnas">Evaluación JA</th>
+                <th class="columnas">Evaluación Prof</th>
+                <th class="columnas"> Evaluación Final</th>
+                <th class="columnas">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for becado in becados %}
             <tr>
-                <td>{{ becado.nombre }}</td>
-                <td>{{ becado.numero_identidad }}</td>
-                <td>{{ becado.direccion_particular }}</td>
-                <td>{{ becado.carrera }}</td>
-                <td>{{ becado.año }}</td>
-                <td>{{ becado.pais }}</td>
-                <td>{{ becado.apartamento.numero }}</td>
-                <td>{{ becado.evaluacion_jefe_residencia }}</td>
-                <td>{{ becado.evaluacion_jefe_apto }}</td>
-                <td>{{ becado.evaluacion_profesor }}</td>
-                <td>{{ becado.get_evaluacion_cualitativa }}</td>
-                <td>
+                <td class="filas">{{ becado.nombre }}</td>
+                <td class="filas">{{ becado.numero_identidad }}</td>
+                <td class="filas">{{ becado.direccion_particular }}</td>
+                <td class="filas">{{ becado.carrera }}</td>
+                <td class="fila1">{{ becado.año }}</td>
+                <td class="filas">{{ becado.pais }}</td>
+                <td class="fila2">{{ becado.apartamento.numero }}</td>
+                <td class="fila2">{{ becado.evaluacion_jefe_residencia }}</td>
+                <td class="fila2">{{ becado.evaluacion_jefe_apto }}</td>
+                <td class="fila2">{{ becado.evaluacion_profesor }}</td>
+                <td class="filas">{{ becado.get_evaluacion_cualitativa }}</td>
+                <td class="filas">
                     <button type="button"
                             class="edit-becado-btn"
                             data-becado-id="{{ becado.id }}">
@@ -188,7 +179,17 @@
         </div>
     </div>
 
-    <a href="{% url 'home' %}">Volver al Inicio</a>
+    <div class="end">
+    <button class="boton" id="addBecadoBtn">Agregar Nuevo Becado</button>
+    <button class="boton" type="submit">Exportar Listado de Becados</button>
+    <form class="extra" method="GET" action="{% url 'export_becados' %}">
+        {% csrf_token %}
+        <input type="hidden" name="filter_option" value="{{ filter_option }}">
+        <input type="hidden" name="filter_country" value="{{ filter_country }}">
+        <input type="text" name="filename" placeholder="Nombre del archivo" required>
+    </form>
+    <a class="boton" href="{% url 'home' %}">Volver al Inicio</a>
+    </div>
 
     <script src="{% static 'js/add_becado.js' %}"></script>
     <script>

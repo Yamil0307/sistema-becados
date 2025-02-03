@@ -4,33 +4,34 @@
     <title>Lista de Residencias - Residencia Estudiantil</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/list_residencias.css' %}">
 </head>
 <body>
-    <h2>Lista de Residencias</h2>
-    <table>
+    <h2 class="titulo">Listado de Residencias</h2>
+    <table class="tabla_residencia">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Cantidad de Apartamentos</th>
-                <th>Jefe del Consejo</th>
-                <th>Profesor que Atiende</th>
-                <th>Estudiantes Cubanos</th>
-                <th>Estudiantes Extranjeros</th>
-                <th>Evaluación</th>
-                <th>Acciones</th>
+                <th class="columnas">Nombre</th>
+                <th class="columnas">Cantidad de Apartamentos</th>
+                <th class="columnas">Jefe del Consejo</th>
+                <th class="columnas">Profesor que Atiende</th>
+                <th class="columnas">Estudiantes Cubanos</th>
+                <th class="columnas">Estudiantes Extranjeros</th>
+                <th class="columnas">Evaluación</th>
+                <th class="columnas">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for data in residencias %}
             <tr>
-                <td>{{ data.residencia.nombre }}</td>
-                <td>{{ data.residencia.cantidad_apartamentos }}</td>
-                <td>{{ data.residencia.jefe_consejo }}</td>
-                <td>{{ data.residencia.profesor_atiende }}</td>
-                <td>{{ data.cubanos }}</td>
-                <td>{{ data.extranjeros }}</td>
-                <td>{{ data.evaluacion }}</td>
-                <td>
+                <td class="filas">{{ data.residencia.nombre }}</td>
+                <td class="numericos">{{ data.residencia.cantidad_apartamentos }}</td>
+                <td class="filas">{{ data.residencia.jefe_consejo }}</td>
+                <td class="filas">{{ data.residencia.profesor_atiende }}</td>
+                <td class="numericos">{{ data.cubanos }}</td>
+                <td class="numericos">{{ data.extranjeros }}</td>
+                <td class="filas">{{ data.evaluacion }}</td>
+                <td class="filas">
                     <button class="editResidenciaBtn" data-id="{{ data.residencia.id }}">Editar</button>
                     <button class="deleteResidenciaBtn" data-id="{{ data.residencia.id }}">Eliminar</button>
                 </td>
@@ -39,7 +40,7 @@
         </tbody>
     </table>
     
-    <button id="addResidenciaBtn">Agregar Nueva Residencia</button>
+    <button class="agregar" id="addResidenciaBtn">Agregar Nueva Residencia</button>
 
     <!-- Modal -->
     <div id="addResidenciaModal" class="modal">
@@ -55,7 +56,7 @@
         </div>
     </div>
     
-    <a href="{% url 'home' %}">Volver al Inicio</a>
+    <a class="inicio" href="{% url 'home' %}">Volver al Inicio</a>
 
     <script src="{% static 'js/list_residencias.js' %}"></script>
 </body>

@@ -10,9 +10,9 @@
         <h1>ResEst Manager</h1>
         <div class="menu">
             <ul>
+                <li><a href="{% url 'list_residencias' %}">Listar Residencias</a></li>
                 <li><a href="{% url 'listar_apartamentos' %}">Listar Apartamentos</a></li>
                 <li><a href="{% url 'add_becado' %}">Listar Becados</a></li>
-                <li><a href="{% url 'list_residencias' %}">Listar Residencias</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
                 {% else %}

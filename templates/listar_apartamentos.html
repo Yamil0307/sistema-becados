@@ -4,50 +4,51 @@
     <title>Listar Apartamentos - Residencia Estudiantil</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/list_apartamentos.css' %}">
 </head>
 <body>
-    <h2>Listar Apartamentos</h2>
+    <h2 class="titulo">Listado de Apartamentos</h2>
 
     <!-- Filter Form -->
     <form method="GET" action="{% url 'listar_apartamentos' %}">
-        <label for="evaluation_filter">Filtrar por Evaluación:</label>
-        <select name="evaluation_filter" id="evaluation_filter">
+        <label class="filtros" for="evaluation_filter">Filtrar por Evaluación:</label>
+        <select class="campo" name="evaluation_filter" id="evaluation_filter">
             <option value="all" {% if evaluation_filter == 'all' %}selected{% endif %}>Todos</option>
             <option value="Excelente" {% if evaluation_filter == 'Excelente' %}selected{% endif %}>Excelente</option>
             <option value="Bien" {% if evaluation_filter == 'Bien' %}selected{% endif %}>Bien</option>
             <option value="Regular" {% if evaluation_filter == 'Regular' %}selected{% endif %}>Regular</option>
             <option value="Mal" {% if evaluation_filter == 'Mal' %}selected{% endif %}>Mal</option>
         </select>
-        <label for="mal_filter">Más de 2 estudiantes evaluados de Mal:</label>
-        <input type="checkbox" name="mal_filter" id="mal_filter" {% if mal_filter == 'on' %}checked{% endif %}>
+        <label class="filtros" for="mal_filter">Más de 2 estudiantes evaluados de Mal:</label>
+        <input class="campo" type="checkbox" name="mal_filter" id="mal_filter" {% if mal_filter == 'on' %}checked{% endif %}>
         <button type="submit">Filtrar</button>
-        <span>Resultados: {{ count }}</span>
+        <span class="filtros">Resultados: {{ count }}</span>
     </form>
 
-    <table>
+    <table class="tabla_apartamento" >
         <thead>
             <tr>
-                <th>Residencia</th>
-                <th>Número</th>
-                <th>Cantidad de Becados</th>
-                <th>Capacidad</th> <!-- Nuevo campo -->
-                <th>Jefe del Apartamento</th>
-                <th>Profesor que Atiende</th>
-                <th>Evaluación</th>
-                <th>Acciones</th>
+                <th class="columnas">Residencia</th>
+                <th class="columnas">Número</th>
+                <th class="columnas">Cantidad de Becados</th>
+                <th class="columnas">Capacidad</th> <!-- Nuevo campo -->
+                <th class="columnas">Jefe del Apartamento</th>
+                <th class="columnas">Profesor que Atiende</th>
+                <th class="columnas">Evaluación</th>
+                <th class="columnas">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for apartamento in apartamentos %}
             <tr>
-                <td>{{ apartamento.residencia.nombre }}</td>
-                <td>{{ apartamento.numero }}</td>
-                <td>{{ apartamento.cantidad_becados }}</td>
-                <td>{{ apartamento.capacidad }}</td> <!-- Nuevo campo -->
-                <td>{{ apartamento.jefe_apto }}</td>
-                <td>{{ apartamento.profesor_atiende }}</td>
-                <td>{{ apartamento.get_evaluacion_apto }}</td>
-                <td>
+                <td class="filas">{{ apartamento.residencia.nombre }}</td>
+                <td class="numeric_1">{{ apartamento.numero }}</td>
+                <td class="numericos">{{ apartamento.cantidad_becados }}</td>
+                <td class="numeric_2">{{ apartamento.capacidad }}</td> <!-- Nuevo campo -->
+                <td class="filas">{{ apartamento.jefe_apto }}</td>
+                <td class="filas">{{ apartamento.profesor_atiende }}</td>
+                <td class="filas">{{ apartamento.get_evaluacion_apto }}</td>
+                <td class="filas">
                     <button class="editApartamentoBtn" data-id="{{ apartamento.id }}">Editar</button>
                     <button class="deleteApartamentoBtn" data-id="{{ apartamento.id }}">Eliminar</button>
                 </td>
@@ -56,7 +57,7 @@
         </tbody>
     </table>
     
-    <button id="addApartamentoBtn">Agregar Nuevo Apartamento</button>
+    <button class="agregar" id="addApartamentoBtn">Agregar Nuevo Apartamento</button>
 
     <!-- Modal -->
     <div id="addApartamentoModal" class="modal">
@@ -72,7 +73,7 @@
         </div>
     </div>
     
-    <a href="{% url 'home' %}">Volver al Inicio</a>
+    <a class="inicio" href="{% url 'home' %}">Volver al Inicio</a>
 
     <script src="{% static 'js/listar_apartamentos.js' %}"></script>
     <script>

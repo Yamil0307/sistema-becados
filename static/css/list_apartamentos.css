@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    justify-content: center;
+    align-items: center;
+    margin: 30px;
+}
+
+.titulo{
+    color: #fff;
+    margin-top: 60px;
+    margin-left: -100px;
+    display: flex;
+    justify-content: center;
+    font-size: 38px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.filtros{
+    color: #fff;
+    font-size: 18px;
+    margin: 15px;
+}
+
+.campo{
+    margin-left: -5px;
+}
+
+.tabla_apartamento{
+    margin-top: 15px;
+    padding-right: 15px;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.columnas{
+    font-size: 16px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.filas{
+    justify-content: space-evenly;
+    font-size: 16px;
+    padding-left: 15px;
+    padding-bottom: 20px;
+}
+
+.numericos{
+    padding-left: 90px;
+}
+
+.numeric_1{
+    padding-left: 40px;
+}
+
+.numeric_2{
+    padding-left: 50px;
+}
+
+.agregar:hover {
+    background-color: rgba(37, 117, 252, 0.7);
+}
+
+.agregar{
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 30px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(140, 17, 203, 0.7);
+}
+
+.inicio:hover {
+    background-color: rgba(37, 117, 252, 0.7);
+}
+
+.inicio{
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 30px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: rgba(140, 17, 203, 0.7);
+}
